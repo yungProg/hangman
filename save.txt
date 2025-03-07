@@ -1,0 +1,1 @@
+{"word":"populations","incorrect_guess_remaining":5,"incorrect_letters":["e"],"guess":["_ ","_ ","_ ","_ ","_ ","a ","_ ","_ ","_ ","_ ","_ "]}
