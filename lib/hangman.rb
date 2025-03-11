@@ -2,7 +2,7 @@ require 'json'
 
 class Hangman
   def initialize
-    @word
+    @word = nil
     @incorrect_guess_remaining = 6
     @incorrect_letters = []
     @guess = []
@@ -18,8 +18,14 @@ class Hangman
   def load_state
     if File.exist?('save.json')
       state = JSON.parse(File.read('save.json'))
-      p state
+      @word = state['word']
+      @incorrect_guess_remaining = state['incorrect_guess_remaining']
+      @incorrect_letters = state['incorrect_letters']
+      @guess = state['guess']
+      @correct_guess = state['correct_guess']
     end
+    puts "Incorrect guess remaining: #{@incorrect_guess_remaining}"
+    puts @incorrect_letters.inspect
   end
 
   def take_user_input
@@ -60,12 +66,10 @@ class Hangman
   end
 
   def game
-    puts 'Welcome to Hangman'
-
-    @word = clean_game_dictionary().sample
+    @word = clean_game_dictionary().sample if @word.nil?
     word_arr = @word.split('')
     
-    @word.length.times { @guess.push('_ ') }
+    @word.length.times { @guess.push('_ ') } if @guess.empty?
   
     puts @guess.join()
   
@@ -93,7 +97,7 @@ class Hangman
         break
       end
     end
-    replay()
+    self.replay()
   end
 
   def replay
@@ -105,10 +109,7 @@ class Hangman
       @incorrect_letters = []
       @guess = []
       @correct_guess = false
-      game()
+      self.game()
     end
   end
 end
-
-a = Hangman.new
-a.game
