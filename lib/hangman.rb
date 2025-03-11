@@ -6,8 +6,7 @@ class Hangman
     @incorrect_guess_remaining = 6
     @incorrect_letters = []
     @guess = []
-    @game_dictionary = File.readlines('google-10000-english-no-swears.txt')
-    @correct_guess? = false
+    @correct_guess = false
   end
 
   def save_state(state)
@@ -34,9 +33,10 @@ class Hangman
     end
   end
 
-  def clean_game_dictionary(dic)
-    dic.map! { |vocab| vocab.strip.downcase }
-    dic.select! { |vocab| vocab.length > 4 && vocab.length < 13 }
+  def clean_game_dictionary()
+    game_dictionary = File.readlines('google-10000-english-no-swears.txt')
+    lower_case = game_dictionary.map { |vocab| vocab.strip.downcase }
+    lower_case.select { |vocab| vocab.length > 4 && vocab.length < 13 }
   end
 
   def check_guess(guessed_letter)
@@ -46,15 +46,14 @@ class Hangman
         @incorrect_guess_remaining -= 1
         puts "Incorrect guess remaining: #{@incorrect_guess_remaining}"
       end
-    end
   end
 
-  def update(guessed_letter)
+  def update(guessed_letter, word_arr)
     frequency = @word.count(guessed_letter)
     frequency.times do
-      word_index = @word_arr.index(player_guess)
+      word_index = word_arr.index(guessed_letter)
       if word_index
-        @guess[word_index] = player_guess + ' '
+        @guess[word_index] = guessed_letter + ' '
         word_arr[word_index] = nil
       end
     end
@@ -63,30 +62,32 @@ class Hangman
   def game
     puts 'Welcome to Hangman'
 
-    @word =   clean_game_dictionary(@game_dictionary).sample
+    @word = clean_game_dictionary().sample
     word_arr = @word.split('')
     
     @word.length.times { @guess.push('_ ') }
   
-    puts '_ '*word.length
+    puts @guess.join()
   
     loop do
       player_guess = take_user_input
       check_guess(player_guess)
 
-      puts @incorrect_letters.inspect unless incorrect_letters.empty?
+      puts @incorrect_letters.inspect unless @incorrect_letters.empty?
   
+      update(player_guess, word_arr)
       puts @guess.join
-      @correct_guess? = true if @word == @guess.join.gsub(' ', '')
+      @correct_guess = true if @word == @guess.join.gsub(' ', '')
   
       save_state({
         :word => @word,
         :incorrect_guess_remaining => @incorrect_guess_remaining,
         :incorrect_letters => @incorrect_letters,
-        :guess => @guess
+        :guess => @guess,
+        :correct_guess => @correct_guess
       })
   
-      if (@incorrect_guess_remaining == 0 || @correct_guess?)
+      if (@incorrect_guess_remaining == 0 || @correct_guess)
         puts @word
         puts 'Game over'
         break
@@ -98,6 +99,16 @@ class Hangman
   def replay
     puts 'Do you want to play again? (Yes/No)'
     play_another_round = gets.chomp.downcase
-    game() if play_another_round == 'yes'
+    if play_another_round == 'yes'
+      @word = nil
+      @incorrect_guess_remaining = 6
+      @incorrect_letters = []
+      @guess = []
+      @correct_guess = false
+      game()
+    end
   end
 end
+
+a = Hangman.new
+a.game
