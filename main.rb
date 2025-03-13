@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'lib/hangman'
 
 game = Hangman.new
@@ -7,9 +9,8 @@ if File.exist?('save.json')
   new_game = gets.chomp.downcase
 end
 
-if new_game == 's'
-  game.game
-else
+unless new_game == 's'
   game.load_state
   game.game
 end
+game.game if new_game == 's'
